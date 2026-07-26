@@ -1,34 +1,34 @@
-# Vehicle Window Control & Fault Detection (Dual ECU, ATmega32)
+﻿# Vehicle Window Control & Fault Detection (Dual ECU, ATmega32)
 
 A distributed embedded system built on two ATmega32 microcontrollers that
-communicate over UART. One ECU handles the vehicle hardware — window motors,
-temperature and proximity sensing — while the other handles the driver
+communicate over UART. One ECU handles the vehicle hardware â€” window motors,
+temperature and proximity sensing â€” while the other handles the driver
 interface. Faults are recorded to external EEPROM so they survive a power
 cycle, which is the point of the whole exercise.
 
-> Embedded Systems Diploma project — Edges For Training.
+> Embedded Systems Diploma project â€” Edges For Training.
 
 ---
 
 ## Architecture
 
 ```
-        ┌─────────────────────┐                ┌─────────────────────┐
-        │      HMI ECU        │     UART       │    CONTROL ECU      │
-        │    (ATmega32)       │◄──────────────►│     (ATmega32)      │
-        │                     │  9600 baud     │                     │
-        │  • 4x4 Keypad       │                │  • 2x Window motors │
-        │  • 16x2 LCD         │  Commands ───► │  • LM35 (ADC)       │
-        │  • Timer1 CTC tick  │  ◄─── Data     │  • Ultrasonic (ICU) │
-        │                     │                │  • EEPROM (I2C)     │
-        │  Issues commands    │                │  Reads sensors,     │
-        │  Displays results   │                │  logs faults        │
-        └─────────────────────┘                └─────────────────────┘
+        â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”                â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+        â”‚      HMI ECU        â”‚     UART       â”‚    CONTROL ECU      â”‚
+        â”‚    (ATmega32)       â”‚â—„â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â–ºâ”‚     (ATmega32)      â”‚
+        â”‚                     â”‚  9600 baud     â”‚                     â”‚
+        â”‚  â€¢ 4x4 Keypad       â”‚                â”‚  â€¢ 2x Window motors â”‚
+        â”‚  â€¢ 16x2 LCD         â”‚  Commands â”€â”€â”€â–º â”‚  â€¢ LM35 (ADC)       â”‚
+        â”‚  â€¢ Timer1 CTC tick  â”‚  â—„â”€â”€â”€ Data     â”‚  â€¢ Ultrasonic (ICU) â”‚
+        â”‚                     â”‚                â”‚  â€¢ EEPROM (I2C)     â”‚
+        â”‚  Issues commands    â”‚                â”‚  Reads sensors,     â”‚
+        â”‚  Displays results   â”‚                â”‚  logs faults        â”‚
+        â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜                â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
 Splitting the system this way means the control ECU can keep sampling sensors
 and driving motors on a tight loop without ever being blocked by LCD writes or
-waiting on keypad input — a display refresh in the same loop as a motor control
+waiting on keypad input â€” a display refresh in the same loop as a motor control
 decision is exactly the kind of coupling this architecture avoids.
 
 ---
@@ -37,7 +37,7 @@ decision is exactly the kind of coupling this architecture avoids.
 
 The two ECUs speak a small byte protocol over UART.
 
-**Commands (HMI → Control)**
+**Commands (HMI â†’ Control)**
 
 | Code | Command | Effect |
 |---|---|---|
@@ -50,8 +50,8 @@ The two ECUs speak a small byte protocol over UART.
 
 | Code | Meaning |
 |---|---|
-| `0x55` | READY_TO_SEND — sender is about to transmit a payload |
-| `0xAA` | ACK — receiver has processed the previous byte |
+| `0x55` | READY_TO_SEND â€” sender is about to transmit a payload |
+| `0xAA` | ACK â€” receiver has processed the previous byte |
 
 The handshake matters because UART has no built-in flow control here. Without
 it, the control ECU can push a data frame while the HMI is still busy writing
@@ -66,13 +66,13 @@ Handles all vehicle-side hardware.
 | Function | Implementation |
 |---|---|
 | Window actuation | Two DC motors, four buttons (open/close per window) |
-| Temperature sensing | LM35 via ADC, overheat threshold at 90 °C |
+| Temperature sensing | LM35 via ADC, overheat threshold at 90 Â°C |
 | Proximity sensing | Ultrasonic via Input Capture Unit, minimum distance 10 cm |
 | Fault storage | External EEPROM over TWI/I2C |
 | Communication | UART slave responding to HMI commands |
 
 **Fault logging.** When a reading crosses a threshold, the corresponding flag is
-written to a fixed EEPROM address — `0x70` for overheat, `0x80` for proximity.
+written to a fixed EEPROM address â€” `0x70` for overheat, `0x80` for proximity.
 Because this is external non-volatile memory rather than RAM, the fault record
 survives a power cycle. That is what makes it a fault *detection* system rather
 than just a live readout: a technician can query faults that occurred while the
@@ -94,7 +94,7 @@ Handles the driver interface.
 | Timing | Timer1 in CTC mode, 1-second tick |
 | Communication | UART master issuing commands |
 
-Timer1 is configured with a compare value of 7812 — with an 8 MHz clock and a
+Timer1 is configured with a compare value of 7812 â€” with an 8 MHz clock and a
 1024 prescaler this gives a one-second interrupt, which drives both the periodic
 display refresh and the ten-second sensor polling cycle.
 
@@ -105,8 +105,8 @@ display refresh and the ten-second sensor polling cycle.
 ## Repository Layout
 
 ```
-control-ecu/          Control ECU firmware — sensors, motors, EEPROM
-hmi-ecu/              HMI ECU firmware — keypad, LCD, menu logic
+control-ecu/          Control ECU firmware â€” sensors, motors, EEPROM
+hmi-ecu/              HMI ECU firmware â€” keypad, LCD, menu logic
 final_project.pdsprj  Proteus simulation of both ECUs wired together
 ```
 
@@ -129,18 +129,7 @@ Each ECU is a separate build.
 
 ---
 
-## What I Learned
-
-<!-- TODO: 2-3 honest sentences.
-
-Good material here: why the ACK handshake was necessary and what went wrong
-without it, debugging UART framing between two boards, or getting the TWI
-timing right for the EEPROM. Something that actually cost you time is worth
-more than a feature summary. -->
-
----
-
 ## Author
 
-**Youssef Yassin** — Electrical & Electronics Engineering
+**Youssef Yassin** â€” Electrical & Electronics Engineering
 [LinkedIn](https://linkedin.com/in/youssef-el-bendary/)
