@@ -1,0 +1,31 @@
+# Build output
+Debug/
+Release/
+*.o
+*.d
+*.elf
+*.map
+*.lss
+*.eep
+*.hex
+
+# Eclipse / IDE
+.settings/
+.metadata/
+.cproject
+.project
+
+# Proteus backups & workspaces
+*.pdsbak
+*.workspace
+Last Loaded*
+
+# Archives & media
+*.rar
+*.zip
+*.mp4
+
+# OS junk
+.DS_Store
+Thumbs.db
+__MACOSX/
